@@ -16,7 +16,7 @@ from attacks.poisoning import label_flipping_attack, feature_noise_attack
 from attacks.drift import gradual_mean_shift, covariate_drift
 from attacks.corruption import drop_features, inject_missing_values, inject_outliers
 from attacks.evasion import evasion_noise, targeted_evasion
-from attacks.attack_validator import validate_config, ValidationError
+from attacks.attack_validator import validate_config, validate_fraction, ValidationError
 from attacks.attack_metrics import AttackMetrics
 
 # Setup logging
