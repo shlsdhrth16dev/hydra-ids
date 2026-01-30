@@ -15,6 +15,7 @@ Components:
 - attack_simulator: Streams attack traffic from test data
 - attack_metrics: Measures attack effectiveness
 - attack_validator: Input validation utilities
+- attack_visualizer: Professional visualization tools
 """
 
 __version__ = '1.0.0'
@@ -22,6 +23,7 @@ __version__ = '1.0.0'
 from .attack_controller import AttackController
 from .attack_simulator import AttackSimulator
 from .attack_metrics import AttackMetrics
+from .attack_visualizer import AttackVisualizer
 from .poisoning import label_flipping_attack, feature_noise_attack
 from .evasion import evasion_noise, targeted_evasion
 from .drift import gradual_mean_shift, covariate_drift
@@ -31,6 +33,7 @@ __all__ = [
     'AttackController',
     'AttackSimulator',
     'AttackMetrics',
+    'AttackVisualizer',
     'label_flipping_attack',
     'feature_noise_attack',
     'evasion_noise',

@@ -107,7 +107,8 @@ class AttackController:
             raise RuntimeError("No baseline data available. Call set_baseline() first.")
         
         logger.info("Rolling back to baseline data")
-        self.attack_history.clear()
+        # History is preserved for reporting - don't clear it
+        # self.attack_history.clear()  # ← REMOVED: This was wiping attack data
         return self.original_data[0].copy(), self.original_data[1].copy() if self.original_data[1] is not None else None
     
     def apply_poisoning(
@@ -399,6 +400,22 @@ class AttackController:
         Args:
             output_path: Path to save JSON report
         """
+        def json_serializer(obj):
+            """Custom serializer for non-JSON-serializable objects."""
+            if isinstance(obj, (np.integer, np.floating)):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, pd.DataFrame):
+                return obj.to_dict()
+            elif isinstance(obj, pd.Series):
+                return obj.tolist()
+            elif hasattr(obj, '__dict__'):
+                # Skip model/scaler objects
+                return str(type(obj).__name__)
+            else:
+                return str(obj)
+        
         report = {
             'config': self.config,
             'attack_history': self.attack_history,
@@ -409,10 +426,23 @@ class AttackController:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
-        with open(output_path, 'w') as f:
-            json.dump(report, f, indent=2, default=str)
-        
-        logger.info(f"Attack report exported to {output_path}")
+        try:
+            with open(output_path, 'w') as f:
+                json.dump(report, f, indent=2, default=json_serializer)
+            logger.info(f"Attack report exported to {output_path}")
+        except Exception as e:
+            logger.error(f"Failed to export report: {e}")
+            # Try with minimal data
+            minimal_report = {
+                'config': self.config,
+                'total_attacks': len(self.attack_history),
+                'timestamp': datetime.now().isoformat(),
+                'note': 'Full history could not be serialized'
+            }
+            with open(output_path, 'w') as f:
+                json.dump(minimal_report, f, indent=2, default=str)
+            logger.warning(f"Exported minimal report due to serialization error")
+
 
 
 if __name__ == "__main__":

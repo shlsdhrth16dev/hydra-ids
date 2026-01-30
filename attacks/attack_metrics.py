@@ -188,6 +188,114 @@ class AttackMetrics:
         
         return effectiveness
     
+    def calculate_per_class_metrics(
+        self,
+        y_true,
+        y_pred_clean,
+        y_pred_attacked,
+        class_names: Optional[list] = None
+    ) -> pd.DataFrame:
+        """
+        Calculate per-class attack impact.
+        
+        Args:
+            y_true: True labels
+            y_pred_clean: Predictions on clean data
+            y_pred_attacked: Predictions on attacked data
+            class_names: Optional class names
+            
+        Returns:
+            DataFrame with per-class metrics
+        """
+        from sklearn.metrics import precision_recall_fscore_support, accuracy_score
+        
+        # Calculate per-class metrics
+        precision_clean, recall_clean, f1_clean, support = precision_recall_fscore_support(
+            y_true, y_pred_clean, average=None, zero_division=0
+        )
+        precision_attacked, recall_attacked, f1_attacked, _ = precision_recall_fscore_support(
+            y_true, y_pred_attacked, average=None, zero_division=0
+        )
+        
+        n_classes = len(precision_clean)
+        if class_names is None:
+            class_names = [f'Class_{i}' for i in range(n_classes)]
+        
+        # Build comparison DataFrame
+        data = []
+        for i in range(n_classes):
+            # Calculate per-class accuracy
+            class_mask = y_true == i
+            if class_mask.sum() > 0:
+                acc_clean = (y_pred_clean[class_mask] == i).sum() / class_mask.sum()
+                acc_attacked = (y_pred_attacked[class_mask] == i).sum() / class_mask.sum()
+            else:
+                acc_clean = acc_attacked = 0
+            
+            data.append({
+                'class': class_names[i] if i < len(class_names) else f'Class_{i}',
+                'support': int(support[i]),
+                'precision_clean': float(precision_clean[i]),
+                'precision_attacked': float(precision_attacked[i]),
+                'precision_drop': float(precision_clean[i] - precision_attacked[i]),
+                'recall_clean': float(recall_clean[i]),
+                'recall_attacked': float(recall_attacked[i]),
+                'recall_drop': float(recall_clean[i] - recall_attacked[i]),
+                'f1_clean': float(f1_clean[i]),
+                'f1_attacked': float(f1_attacked[i]),
+                'f1_drop': float(f1_clean[i] - f1_attacked[i]),
+                'accuracy_clean': float(acc_clean),
+                'accuracy_attacked': float(acc_attacked),
+                'accuracy_drop': float(acc_clean - acc_attacked)
+            })
+        
+        df = pd.DataFrame(data)
+        logger.info(f"Calculated per-class metrics for {n_classes} classes")
+        
+        return df
+    
+    def calculate_robustness_score(
+        self,
+        attack_results: Dict[str, Dict]
+    ) -> Dict[str, float]:
+        """
+        Calculate overall model robustness score (0-100).
+        
+        Higher score means more robust (resistant to attacks).
+        
+        Args:
+            attack_results: Dictionary of attack evaluation results
+            
+        Returns:
+            Dict with robustness scores and breakdown
+        """
+        if not attack_results:
+            return {'overall_robustness': 100.0}
+        
+        # Extract effectiveness scores
+        effectiveness_scores = [
+            results.get('attack_effectiveness', 0)
+            for results in attack_results.values()
+        ]
+        
+        # Robustness is inverse of effectiveness
+        avg_effectiveness = np.mean(effectiveness_scores)
+        max_effectiveness = np.max(effectiveness_scores)
+        min_effectiveness = np.min(effectiveness_scores)
+        
+        # Calculate robustness (0-100 scale)
+        overall_robustness = (1 - avg_effectiveness) * 100
+        best_case_robustness = (1 - min_effectiveness) * 100
+        worst_case_robustness = (1 - max_effectiveness) * 100
+        
+        return {
+            'overall_robustness': float(overall_robustness),
+            'best_case_robustness': float(best_case_robustness),
+            'worst_case_robustness': float(worst_case_robustness),
+            'avg_attack_effectiveness': float(avg_effectiveness),
+            'vulnerability_score': float(avg_effectiveness * 100)
+        }
+    
     def compare_attacks(
         self,
         attack_results: Dict[str, Dict]
