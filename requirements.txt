@@ -24,3 +24,27 @@ pytest>=7.4.0
 
 # Type Checking (for development)
 typing-extensions>=4.8.0
+
+# Self-Healing System Dependencies
+# Advanced Drift Detection
+evidently>=0.4.0
+scipy>=1.11.0
+
+# Hyperparameter Optimization
+optuna>=3.0.0
+
+# Configuration & Validation
+pydantic>=2.0.0
+pyyaml>=6.0.0
+
+# Monitoring & MLOps
+mlflow>=2.0.0
+prometheus-client>=0.19.0
+
+# Utilities
+python-dateutil>=2.8.0
+
+# Alerts (optional - install as needed)
+# slack-sdk>=3.0.0
+# sendgrid>=6.0.0
+

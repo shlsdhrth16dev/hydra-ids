@@ -1,0 +1,62 @@
+{
+  "v_20260131_102625": {
+    "version_id": "v_20260131_102625",
+    "timestamp": "2026-01-31T10:26:25.513326",
+    "model_type": "RandomForestClassifier",
+    "path": "models\\baseline\\versions\\v_20260131_102625.joblib",
+    "tag": null,
+    "is_latest": true,
+    "custom_metadata": {
+      "trigger": "self_healing",
+      "decision": {
+        "timestamp": "2026-01-31T10:26:24.081740",
+        "action": "retrain",
+        "confidence": 0.95,
+        "reasoning": [
+          "Critical health with drift"
+        ],
+        "policy": "balanced",
+        "health_severity": "critical",
+        "drift_severity": "warning",
+        "is_healthy": false,
+        "drift_detected": true,
+        "can_retrain": true,
+        "in_cooldown": false,
+        "metadata": {
+          "recent_retrains": 0,
+          "last_action_time": null
+        }
+      }
+    }
+  },
+  "v_20260131_102646": {
+    "version_id": "v_20260131_102646",
+    "timestamp": "2026-01-31T10:26:46.297937",
+    "model_type": "RandomForestClassifier",
+    "path": "models\\baseline\\versions\\v_20260131_102646.joblib",
+    "tag": "latest",
+    "is_latest": true,
+    "custom_metadata": {
+      "trigger": "self_healing",
+      "decision": {
+        "timestamp": "2026-01-31T10:26:44.987557",
+        "action": "retrain",
+        "confidence": 0.95,
+        "reasoning": [
+          "Critical health with drift"
+        ],
+        "policy": "balanced",
+        "health_severity": "critical",
+        "drift_severity": "warning",
+        "is_healthy": false,
+        "drift_detected": true,
+        "can_retrain": true,
+        "in_cooldown": false,
+        "metadata": {
+          "recent_retrains": 0,
+          "last_action_time": null
+        }
+      }
+    }
+  }
+}
